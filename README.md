@@ -26,22 +26,15 @@ Then add this library to your `pom.xml`:
 ```
 
 The [`RestFeedServerAutoConfiguration`](src/main/java/org/restfeeds/server/spring/RestFeedServerAutoConfiguration.java) adds all relevant beans.
-You only need to add a `@RestController` that calls the `RestFeedEndpoint#fetch` method, 
-or use the generic `RestFeedEndpointController` by registering it as a bean.
 
-```java
-@SpringBootApplication
-public class RestFeedServerApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(RestFeedServerApplication.class, args);
-  }
+Add these properties to your `application.properties`:
 
-  @Bean
-  public RestFeedEndpointController restFeedEndpointController(RestFeedEndpoint restFeedEndpoint) {
-    return new RestFeedEndpointController(restFeedEndpoint);
-  }
-}
+```properties
+restfeed.server.feed=myfeed
+restfeed.server.path=/myfeed
+restfeed.server.limit=1000
+restfeed.server.jdbc.table=feed
 ```
 
 Next, make sure to have a valid schema for you database set up (use [Flyway](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-use-a-higher-level-database-migration-tool) or the [schema.sql](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#howto-initialize-a-database-using-spring-jdbc) file):
@@ -50,7 +43,6 @@ Next, make sure to have a valid schema for you database set up (use [Flyway](htt
 create table feed
 (
     position identity primary key,
-    feed     varchar(1024) not null,
     id       varchar(1024) not null,
     type     varchar(1024),
     resource varchar(1024),
@@ -58,8 +50,6 @@ create table feed
     timestamp timestamp,
     data      clob
 );
-
-create index feed_position ON feed(feed, position);
 ```
 
 and make sure your database is connected in your `application.properties`:
@@ -85,50 +75,28 @@ When you start the application, you can connect to http://localhost:8080/myfeed.
 
 Find a fully working example at https://github.com/rest-feeds/rest-feed-server-example-spring-web.
 
-## Components
+## Security
 
-When providing a server, you need to provide implementations for these components:
+Basic Auth is optionally supported.
 
-### FeedItemRepository
+Add the `spring-boot-starter-security` dependency to your `pom.xml`:
 
-Default implementation for Spring: org.restfeeds.server.spring.JdbcFeedItemRepository
+```xml
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+```
 
-Feed items are stored in a _repository_ in chronological order of addition.
-An SQL database is a good choice, as it provides auto incrementation of primary keys.
-A single partitioned Kafka topic may also be reasonable as repository, but it requires more custom client and offset handling.
+and specify a username and password in your `application.properties`:
 
-Provide access to the database that stores the feed items.
+```properties
+# alice:secure123
+restfeed.server.credentials[0].username=alice
+restfeed.server.credentials[0].password={bcrypt}$2a$10$WWJ/p6BOga2R5TRb2LIy4OzlPNiwNM0/aikVKuQ74dKgs67xLIeGS
+```
 
-Consider a good primary key that identifies a feed item and guarantees the chronological sequence of addition to the feed.
-An auto-incrementing database sequence is a good choice.
-
-The RestFeedEndpoint polls the repository every few milliseconds for new items.
-Make sure that the fields used for `feed` (if any) and `position` are indexed.
-
-### NextLinkBuilder
-
-Default implementation for Spring: org.restfeeds.server.spring.CurrentRequestNextLinkBuilder
-
-The `next` link must provide access to all subsequent feed items.
-The next link must not include the current feed items.
-
-It is up to the implementation, how this link is build and evaluated.
-
-### HTTP endpoint
-
-Default implementation for Spring: org.restfeeds.server.spring.RestFeedEndpointController
-
-GET endpoint to access the feed, both the base URL and the `next` URLs.
-
-This endpoint must call the `RestFeedEndpoint#fetch` method and pass the item offset and the page limit.
-
-This endpoint (or the framework) must implement content negotiation.
+The password should be encoded, e. g. with [BCrypt](https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/crypto/bcrypt/BCryptPasswordEncoder.html).
 
 
-## Other Java Stacks
 
-The library is written in pure Java and has no transitive compile dependencies.
-
-Feel free to implement your endpoint in Java EE, Quarkus, Kotlin, Spring Webflux, etc.
-
-Further examples are highly appreciated.
