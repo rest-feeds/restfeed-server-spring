@@ -1,4 +1,4 @@
-# restfeed-server-java
+# restfeed-server-spring
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.restfeeds/restfeed-server-spring/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.restfeeds/restfeed-server-spring)
 
