@@ -63,7 +63,7 @@ public class RestFeedServerAutoConfiguration {
 
   @Configuration(proxyBeanMethods = false)
   @ConditionalOnClass(InMemoryUserDetailsManager.class)
-  public static class RestFeedServerSecurityConfiguration {
+  public static class RestFeedServerSecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = "restfeed.server.credentials[0].username")
