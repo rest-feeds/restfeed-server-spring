@@ -1,0 +1,35 @@
+{
+  "properties": [
+    {
+      "name": "restfeed.server.feed",
+      "type": "java.lang.String",
+      "description": "Name of the feed. Defaults to `feed`."
+    },
+    {
+      "name": "restfeed.server.path",
+      "type": "java.lang.String",
+      "description": "Required. The URI path of the feed. Should start with `/`."
+    },
+    {
+      "name": "restfeed.server.limit",
+      "type": "java.lang.String",
+      "description": "Max items to return per request. Defaults to 1000."
+    },
+    {
+      "name": "restfeed.server.jdbc.table",
+      "type": "java.lang.String",
+      "description": "JDBC Database table name to be used by the org.restfeeds.server.spring.JdbcFeedItemRepository. Defaults to `feed`."
+    },
+    {
+      "name": "restfeed.server.credentials[0].username",
+      "type": "java.lang.String",
+      "description": "Specifies a list of basic auth credentials. Active, if spring-security is in in classpath and no other WebSecurity Configuration is present."
+    }
+  ,
+    {
+      "name": "restfeed.server.credentials[0].password",
+      "type": "java.lang.String",
+      "description": "Specifies a list of basic auth credentials. Active, if spring-security is in in classpath and no other WebSecurity Configuration is present."
+    }
+  ]
+}
